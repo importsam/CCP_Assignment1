@@ -63,14 +63,25 @@ public class AdminController {
     	
     	Instant utcNow = Instant.now();
     	double serverUptimeSeconds = Duration.between(serverStart, utcNow).toSeconds();
-    	
-    	//Map response body to simulate JSON return format
-    	Map<String, Object> responseBody = new LinkedHashMap<>();
-    	responseBody.put("utcServerStart", serverStart.toString());
-    	responseBody.put("utcNow", utcNow.toString());
-    	responseBody.put("serverUptimeSeconds", serverUptimeSeconds);
-    	
-    	return ResponseEntity.ok(responseBody);
+    	try {
+        	//Map response body to simulate JSON return format
+        	Map<String, Object> responseBody = new LinkedHashMap<>();
+        	responseBody.put("utcServerStart", serverStart.toString());
+        	responseBody.put("utcNow", utcNow.toString());
+        	responseBody.put("serverUptimeSeconds", serverUptimeSeconds);
+        	
+        	return ResponseEntity.ok(responseBody);
+    	} 
+    	catch (Exception e) {
+    		Map<String, Object> errorResponseBody = new LinkedHashMap<>();
+    		errorResponseBody.put("timestamp", Instant.now().toString());
+    		errorResponseBody.put("status", 500);
+    		errorResponseBody.put("error", "Internal Server Error");
+    		errorResponseBody.put("message", "Server uptime unavailable. An error occurred.");
+    		errorResponseBody.put("path", "/api/v1/admin/uptime");
+    		
+    		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseBody);
+    	}
     }
     
     @PostMapping("/api/v1/admin/shutdown")
@@ -101,7 +112,7 @@ public class AdminController {
         	new Thread(() -> {
         		try {
         			Thread.sleep(500);
-        		}catch (InterruptedException e){}
+        		} catch (InterruptedException e){}
         		
         		context.close();
         		
@@ -118,7 +129,7 @@ public class AdminController {
     		Map<String, Object> errorResponseBody = new LinkedHashMap<>();
     		errorResponseBody.put("timestamp", Instant.now().toString());
     		errorResponseBody.put("status", 500);
-    		errorResponseBody.put("error", "InternalServerError");
+    		errorResponseBody.put("error", "Internal Server Error");
     		errorResponseBody.put("message", "Server error, graceful shutdown failed.");
     		errorResponseBody.put("path", "/api/v1/admin/shutdown");
     		
