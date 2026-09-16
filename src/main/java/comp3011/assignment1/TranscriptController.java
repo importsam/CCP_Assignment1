@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @RestController 
 public class TranscriptController {
@@ -27,13 +29,10 @@ public class TranscriptController {
 	private final TokenInOut tokenInOut;
 	
 	// Constructor, we import the API key securely and initialise the token stats.  
-    public TranscriptController(@Value("${OPENAI_API_KEY}") String apiKey, TokenInOut tokenInOut) {  
-    	this.client = OpenAIOkHttpClient.builder()
-            .apiKey(apiKey)
-            .build();
-    	
-    	this.tokenInOut = tokenInOut;
-    }
+	public TranscriptController(OpenAIClient client, TokenInOut tokenInOut) {
+    	this.client = client;
+	    this.tokenInOut = tokenInOut;
+	}
 	
 /*  Transcribe endpoint for sending microphone audio to the OpenAI model and receiving a transcript./
   * Additionally, this records the number of tokens used in input and output, recorded via the TokenInOut object.
@@ -69,5 +68,17 @@ public class TranscriptController {
 		
 		// return the transcribed text
 		return transcript.text();
+	}
+	
+//	Configuration class for the OpenAI class. Makes the constructor simpler and 
+//	Keeps it accessible over the application
+	@Configuration
+	public static class OpenAIConfig {
+//		Safely access the api key without leakage
+	    @Bean OpenAIClient openAIClient(@Value("${OPENAI_API_KEY}") String apiKey) {
+	        return OpenAIOkHttpClient.builder()
+	        		.apiKey(apiKey)
+	        		.build();
+	    }
 	}
 }

@@ -49,14 +49,11 @@ public class AdminController {
 	private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
 	
 //	Constructor getting API key, application context, and the token usage count.
-    public AdminController(@Value("${OPENAI_API_KEY}") String apiKey, ConfigurableApplicationContext context, TokenInOut tokenInOut) {  
-    	this.client = OpenAIOkHttpClient.builder()
-            .apiKey(apiKey)
-            .build();
-    	
-    	this.context = context;
-    	this.tokenInOut = tokenInOut;
-    }
+	public AdminController(OpenAIClient client, ConfigurableApplicationContext context, TokenInOut tokenInOut) {
+	    this.client = client;
+	    this.context = context;
+	    this.tokenInOut = tokenInOut;
+	}
     
     /*
      * GET Request endpoint to access the uptime of the server.

@@ -19,7 +19,7 @@ import java.util.Optional;
 import com.openai.client.OpenAIClient;
 import com.openai.models.audio.transcriptions.Transcription;
 import com.openai.models.audio.transcriptions.TranscriptionCreateResponse;
-
+import org.mockito.Answers;
 // https://medium.com/@deepjashan2020/types-of-testing-you-need-to-know-in-java-spring-boot-763b231853a2
 // https://www.baeldung.com/spring-boot-testing#integration-testing-with-springboottest
 // https://site.mockito.org/javadoc/current/org/mockito/Mock.html
@@ -29,7 +29,7 @@ class TranscriptControllerTest {
 	
 	@Autowired private MockMvc mvc;
 	
-	@MockitoBean private OpenAIClient client;
+	@MockitoBean(answers = Answers.RETURNS_DEEP_STUBS) private OpenAIClient client;
 	
 	@Test
 	void transcribeRequestTest() throws Exception {
