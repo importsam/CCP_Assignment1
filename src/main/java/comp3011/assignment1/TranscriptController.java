@@ -1,5 +1,7 @@
 package comp3011.assignment1;
 
+import comp3011.assignment1.AdminController.TokenInOut;
+
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -19,16 +21,20 @@ import org.springframework.beans.factory.annotation.Value;
 public class TranscriptController {
 	
 	private final OpenAIClient client;
+	private final TokenInOut tokenInOut;
 	
-    public TranscriptController(@Value("${OPENAI_API_KEY}") String apiKey) {  
+    public TranscriptController(@Value("${OPENAI_API_KEY}") String apiKey, TokenInOut tokenInOut) {  
     	this.client = OpenAIOkHttpClient.builder()
             .apiKey(apiKey)
             .build();
+    	
+    	this.tokenInOut = tokenInOut;
     }
 	
 	@PostMapping("/transcribe")
 	public String transcribe(@RequestParam("audio") MultipartFile audio) throws Exception {
-				
+//		https://developers.openai.com/api/reference/java/resources/audio/subresources/transcriptions
+		
 		Path temp = Files.createTempFile("audio", ".webm");
 		audio.transferTo(temp);
 		
@@ -39,6 +45,16 @@ public class TranscriptController {
 	            .build());
 		
 		Files.deleteIfExists(temp);
-		return model_response.asTranscription().text();
+		
+		var transcript = model_response.asTranscription();
+		transcript.usage().ifPresent(usage -> {
+			if(usage.isTokens()) {
+				long tokensIn = usage.asTokens().inputTokens();
+				long tokensOut = usage.asTokens().outputTokens();
+				tokenInOut.updateTokens(tokensIn, tokensOut);
+			}
+		});
+		
+		return transcript.text();
 	}
 }
