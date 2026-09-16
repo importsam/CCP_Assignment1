@@ -40,7 +40,6 @@ public class AdminController {
 	private final OpenAIClient client;
 	private final TokenInOut tokenInOut;
 	
-
 	private final ConfigurableApplicationContext context;
 	
 	// This is the server start reference point
@@ -137,7 +136,7 @@ public class AdminController {
     	}
   
     }
-        
+    
     @GetMapping("/api/v1/global/stats")
     public ResponseEntity<Map<String, Object>> stats() throws Exception {
     	/* This endpoint will read from the TokenInOut count and
@@ -157,7 +156,7 @@ public class AdminController {
 
     @Component
     public static class TokenInOut {
-    	/* AtomicInteger is used here because it is thread safe
+    	/* AtomicLong is used here because it is thread safe
     	 * when there are many HTTP requests happening at the same time. 
     	 * This avoids problems such as race conditions. By default, 
     	 * the token usage returns a long cast count.
@@ -179,6 +178,3 @@ public class AdminController {
     	}
     }
 }
-
-
-
