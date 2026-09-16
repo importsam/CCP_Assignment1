@@ -3,8 +3,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import comp3011.assignment1.AdminController.TokenInOut;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 class AdminControllerTest {
 	
 	@Autowired private MockMvc mvc;
+	@Autowired private TokenInOut tokenInOut;
 	
 	@MockitoBean
 	private ConfigurableApplicationContext context;
@@ -51,5 +56,20 @@ class AdminControllerTest {
 	        .andExpect(jsonPath("$.path").value("/api/v1/admin/shutdown"));
 	}
 	
+	@Test 
+	void statsTest() throws Exception {
+		// mock tokens in and out
+		long in = tokenInOut.getTokensIn();
+		long out = tokenInOut.getTokensOut();
+		
+		// Update the current token count
+		tokenInOut.updateTokens(50,50);
+		
+		// check the token counts and that the values were updated correctly
+	    mvc.perform(get("/api/v1/global/stats"))
+	        .andExpect(status().isOk())
+	        .andExpect(jsonPath("$.inputTokens").value(in + 50))
+	        .andExpect(jsonPath("$.outputTokens").value(out + 50));
+	}
 	
 }
